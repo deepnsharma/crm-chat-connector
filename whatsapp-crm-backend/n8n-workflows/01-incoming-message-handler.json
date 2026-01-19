@@ -1,0 +1,22 @@
+{
+  "name": "WhatsApp Incoming Message Handler",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "whatsapp-incoming", "responseMode": "onReceived" },
+      "name": "Webhook", "type": "n8n-nodes-base.webhook", "position": [250, 300]
+    },
+    {
+      "parameters": { "conditions": { "string": [{ "value1": "={{$json.event}}", "value2": "LEAD_CREATED" }] } },
+      "name": "Is Lead?", "type": "n8n-nodes-base.if", "position": [450, 300]
+    },
+    {
+      "parameters": { "url": "={{$env.SPRING_BOOT_URL}}/api/crm/leads/{{$json.leadId}}", "responseFormat": "json" },
+      "name": "Get Lead Details", "type": "n8n-nodes-base.httpRequest", "position": [650, 200]
+    },
+    {
+      "parameters": { "toEmail": "sales@company.com", "subject": "New Lead from WhatsApp", "text": "New lead created: {{$json.firstName}} {{$json.lastName}}\nCompany: {{$json.companyName}}\nPhone: {{$json.phone}}" },
+      "name": "Email Sales", "type": "n8n-nodes-base.emailSend", "position": [850, 200]
+    }
+  ],
+  "connections": { "Webhook": { "main": [[{ "node": "Is Lead?", "type": "main", "index": 0 }]] }, "Is Lead?": { "main": [[{ "node": "Get Lead Details", "type": "main", "index": 0 }], []] }, "Get Lead Details": { "main": [[{ "node": "Email Sales", "type": "main", "index": 0 }]] } }
+}
