@@ -1,0 +1,18 @@
+{
+  "name": "Send Quotation to Customer",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "send-quotation", "responseMode": "onReceived" },
+      "name": "Trigger", "type": "n8n-nodes-base.webhook", "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SPRING_BOOT_URL}}/api/notifications/quotation",
+        "method": "POST",
+        "bodyParametersJson": "={\"phoneNumber\": \"{{$json.phone}}\", \"customerName\": \"{{$json.customerName}}\", \"quoteNumber\": \"{{$json.quoteNumber}}\", \"totalAmount\": {{$json.totalAmount}}, \"pdfUrl\": \"{{$json.pdfUrl}}\", \"quoteId\": \"{{$json.quoteId}}\"}"
+      },
+      "name": "Send WhatsApp", "type": "n8n-nodes-base.httpRequest", "position": [450, 300]
+    }
+  ],
+  "connections": { "Trigger": { "main": [[{ "node": "Send WhatsApp", "type": "main", "index": 0 }]] } }
+}

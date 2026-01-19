@@ -1,0 +1,97 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: whatsapp-crm-integration
+  
+  # Database Configuration (H2 for development, PostgreSQL for production)
+  datasource:
+    url: jdbc:h2:mem:whatsappcrm;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+# Microsoft Dynamics 365 CRM Configuration
+dynamics365:
+  # Your Dynamics 365 organization URL (e.g., https://yourorg.crm.dynamics.com)
+  base-url: ${DYNAMICS365_BASE_URL:https://yourorg.crm.dynamics.com}
+  api-version: v9.2
+  
+  # Azure AD OAuth Configuration
+  azure:
+    tenant-id: ${AZURE_TENANT_ID:your-tenant-id}
+    client-id: ${AZURE_CLIENT_ID:your-client-id}
+    client-secret: ${AZURE_CLIENT_SECRET:your-client-secret}
+    # Resource/Scope for Dynamics 365
+    scope: ${DYNAMICS365_BASE_URL:https://yourorg.crm.dynamics.com}/.default
+
+# WhatsApp Business API Configuration (Meta)
+whatsapp:
+  api:
+    base-url: https://graph.facebook.com/v18.0
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:your-phone-number-id}
+    access-token: ${WHATSAPP_ACCESS_TOKEN:your-access-token}
+    verify-token: ${WHATSAPP_VERIFY_TOKEN:your-verify-token}
+    webhook-secret: ${WHATSAPP_WEBHOOK_SECRET:your-webhook-secret}
+
+# n8n Webhook Configuration
+n8n:
+  base-url: ${N8N_BASE_URL:https://your-n8n-domain.com}
+  webhooks:
+    incoming-message: ${N8N_WEBHOOK_INCOMING:/webhook/whatsapp-incoming}
+    quotation-response: ${N8N_WEBHOOK_QUOTATION:/webhook/quotation-response}
+    lead-created: ${N8N_WEBHOOK_LEAD:/webhook/lead-created}
+    complaint-registered: ${N8N_WEBHOOK_COMPLAINT:/webhook/complaint-registered}
+    do-request: ${N8N_WEBHOOK_DO:/webhook/do-request}
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.dpl: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Custom Entity Names (if you have custom tables in Dataverse)
+crm:
+  entities:
+    account: accounts
+    contact: contacts
+    lead: leads
+    opportunity: opportunities
+    quote: quotes
+    salesorder: salesorders
+    complaint: cr_complaints  # Custom entity example
+    delivery-order: cr_deliveryorders  # Custom entity example

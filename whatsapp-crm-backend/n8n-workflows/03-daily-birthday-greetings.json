@@ -1,0 +1,22 @@
+{
+  "name": "Daily Birthday Greetings",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "cronExpression", "expression": "0 9 * * *" }] } },
+      "name": "Daily 9AM", "type": "n8n-nodes-base.cron", "position": [250, 300]
+    },
+    {
+      "parameters": { "url": "={{$env.SPRING_BOOT_URL}}/api/crm/query/contacts?filter=birthdate eq {{$today.format('YYYY-MM-DD')}}&select=contactid,firstname,lastname,mobilephone" },
+      "name": "Get Birthdays", "type": "n8n-nodes-base.httpRequest", "position": [450, 300]
+    },
+    {
+      "parameters": {},
+      "name": "Loop Contacts", "type": "n8n-nodes-base.splitInBatches", "position": [650, 300]
+    },
+    {
+      "parameters": { "url": "={{$env.SPRING_BOOT_URL}}/api/notifications/birthday", "method": "POST", "bodyParametersJson": "={\"phoneNumber\": \"{{$json.mobilephone}}\", \"customerName\": \"{{$json.firstname}}\"}" },
+      "name": "Send Greeting", "type": "n8n-nodes-base.httpRequest", "position": [850, 300]
+    }
+  ],
+  "connections": { "Daily 9AM": { "main": [[{ "node": "Get Birthdays" }]] }, "Get Birthdays": { "main": [[{ "node": "Loop Contacts" }]] }, "Loop Contacts": { "main": [[{ "node": "Send Greeting" }]] } }
+}
